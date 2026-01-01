@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Gastos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 to-gray-800 min-h-screen text-white">
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- Header com navegação -->
+        <header class="flex justify-between items-center mb-10">
+            <div>
+                <h1 class="text-4xl font-bold mb-2">
+                    <i class="fas fa-wallet text-green-500 mr-3"></i>
+                    Controle de Gastos
+                </h1>
+                <p class="text-gray-400">Gerencie seu orçamento mensal por categorias</p>
+            </div>
+            <nav>
+                <a href="index.html" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition">
+                    <i class="fas fa-chart-line mr-2"></i>Calculadora de Juros
+                </a>
+            </nav>
+        </header>
+
+        <!-- Renda Mensal -->
+        <section class="bg-gray-800 rounded-2xl shadow-xl p-6 mb-8">
+            <h2 class="text-2xl font-semibold mb-4">
+                <i class="fas fa-money-bill-wave text-green-500 mr-2"></i>
+                Renda Mensal
+            </h2>
+            <div class="flex flex-wrap gap-4 items-end">
+                <div class="flex-1 min-w-[200px]">
+                    <label for="monthlyIncome" class="block text-sm font-medium text-gray-300 mb-1">
+                        Valor da Renda (R$)
+                    </label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">R$</span>
+                        <input type="text" id="monthlyIncome" 
+                            class="w-full pl-10 pr-3 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-white text-lg currency-input"
+                            placeholder="0,00" value="5.000,00">
+                    </div>
+                </div>
+                <div class="flex-1 min-w-[200px]">
+                    <label for="monthSelect" class="block text-sm font-medium text-gray-300 mb-1">
+                        Mês de Referência
+                    </label>
+                    <select id="monthSelect" 
+                        class="w-full px-3 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-white">
+                        <option value="01">Janeiro</option>
+                        <option value="02">Fevereiro</option>
+                        <option value="03">Março</option>
+                        <option value="04">Abril</option>
+                        <option value="05">Maio</option>
+                        <option value="06">Junho</option>
+                        <option value="07">Julho</option>
+                        <option value="08">Agosto</option>
+                        <option value="09">Setembro</option>
+                        <option value="10">Outubro</option>
+                        <option value="11">Novembro</option>
+                        <option value="12">Dezembro</option>
+                    </select>
+                </div>
+                <div class="flex-1 min-w-[150px]">
+                    <label for="yearSelect" class="block text-sm font-medium text-gray-300 mb-1">
+                        Ano
+                    </label>
+                    <select id="yearSelect" 
+                        class="w-full px-3 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-white">
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Metas (Configuração de %) -->
+            <section class="lg:col-span-1">
+                <div class="bg-gray-800 rounded-2xl shadow-xl p-6">
+                    <h2 class="text-2xl font-semibold mb-6">
+                        <i class="fas fa-bullseye text-yellow-500 mr-2"></i>
+                        Metas
+                    </h2>
+                    <p class="text-gray-400 text-sm mb-4">Ajuste a porcentagem de cada categoria. O total deve ser 100%.</p>
+                    
+                    <div id="metasContainer" class="space-y-4">
+                        <!-- Categorias serão inseridas via JS -->
+                    </div>
+                    
+                    <div class="mt-6 pt-4 border-t border-gray-700">
+                        <div class="flex justify-between items-center">
+                            <span class="font-semibold text-gray-300">Total:</span>
+                            <span id="totalPercentage" class="text-xl font-bold text-green-500">100%</span>
+                        </div>
+                        <p id="percentageWarning" class="text-red-500 text-sm mt-2 hidden">
+                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                            O total deve ser igual a 100%
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Resumo -->
+            <section class="lg:col-span-2">
+                <div class="bg-gray-800 rounded-2xl shadow-xl p-6">
+                    <h2 class="text-2xl font-semibold mb-6">
+                        <i class="fas fa-clipboard-list text-blue-500 mr-2"></i>
+                        Resumo
+                    </h2>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b border-gray-700">
+                                    <th class="text-left py-3 px-2 font-semibold text-gray-300">Budget</th>
+                                    <th class="text-right py-3 px-2 font-semibold text-gray-300">Valor Gasto</th>
+                                    <th class="text-right py-3 px-2 font-semibold text-gray-300">Devo Gastar</th>
+                                    <th class="text-right py-3 px-2 font-semibold text-gray-300">Utilizado</th>
+                                    <th class="text-right py-3 px-2 font-semibold text-gray-300">Restante</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resumoTable">
+                                <!-- Linhas serão inseridas via JS -->
+                            </tbody>
+                            <tfoot>
+                                <tr class="border-t-2 border-gray-600 font-bold">
+                                    <td class="py-3 px-2 text-green-400">TOTAL</td>
+                                    <td id="totalGasto" class="text-right py-3 px-2">R$ 0,00</td>
+                                    <td id="totalDevoGastar" class="text-right py-3 px-2">R$ 0,00</td>
+                                    <td id="totalUtilizado" class="text-right py-3 px-2 text-yellow-500">0.00%</td>
+                                    <td id="totalRestante" class="text-right py-3 px-2">R$ 0,00</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Lançar Gastos -->
+                <div class="bg-gray-800 rounded-2xl shadow-xl p-6 mt-8">
+                    <h2 class="text-2xl font-semibold mb-6">
+                        <i class="fas fa-plus-circle text-purple-500 mr-2"></i>
+                        Lançar Gasto
+                    </h2>
+                    
+                    <form id="expenseForm" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label for="expenseCategory" class="block text-sm font-medium text-gray-300 mb-1">
+                                Categoria
+                            </label>
+                            <select id="expenseCategory" 
+                                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white">
+                                <!-- Opções serão inseridas via JS -->
+                            </select>
+                        </div>
+                        <div>
+                            <label for="expenseDescription" class="block text-sm font-medium text-gray-300 mb-1">
+                                Descrição
+                            </label>
+                            <input type="text" id="expenseDescription" 
+                                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white"
+                                placeholder="Ex: Aluguel">
+                        </div>
+                        <div>
+                            <label for="expenseValue" class="block text-sm font-medium text-gray-300 mb-1">
+                                Valor (R$)
+                            </label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">R$</span>
+                                <input type="text" id="expenseValue" 
+                                    class="w-full pl-10 pr-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white currency-input"
+                                    placeholder="0,00">
+                            </div>
+                        </div>
+                        <div class="flex items-end">
+                            <button type="submit" 
+                                class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition">
+                                <i class="fas fa-plus mr-2"></i>Adicionar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Lista de Gastos -->
+                <div class="bg-gray-800 rounded-2xl shadow-xl p-6 mt-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-semibold">
+                            <i class="fas fa-list text-orange-500 mr-2"></i>
+                            Gastos Lançados
+                        </h2>
+                        <button id="clearExpenses" class="text-red-500 hover:text-red-400 text-sm">
+                            <i class="fas fa-trash mr-1"></i>Limpar Todos
+                        </button>
+                    </div>
+                    
+                    <div id="expensesList" class="space-y-2 max-h-96 overflow-y-auto">
+                        <p class="text-gray-500 text-center py-4">Nenhum gasto lançado ainda</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="text-center mt-12 text-gray-500 text-sm">
+            <p>Controle de Gastos • Desenvolvido com <i class="fas fa-heart text-red-500"></i> para suas finanças</p>
+        </footer>
+    </div>
+
+    <script src="gastos.js"></script>
+</body>
+</html>

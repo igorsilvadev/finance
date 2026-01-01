@@ -290,7 +290,8 @@ class CompoundInterestCalculator {
                         position: 'top',
                         labels: {
                             usePointStyle: true,
-                            padding: 15
+                            padding: 15,
+                            color: '#d1d5db'
                         }
                     },
                     tooltip: {
@@ -316,25 +317,35 @@ class CompoundInterestCalculator {
                         display: true,
                         title: {
                             display: true,
-                            text: 'Período'
+                            text: 'Período',
+                            color: '#9ca3af'
                         },
                         ticks: {
-                            maxTicksLimit: 12
+                            maxTicksLimit: 12,
+                            color: '#9ca3af'
+                        },
+                        grid: {
+                            color: 'rgba(75, 85, 99, 0.3)'
                         }
                     },
                     y: {
                         display: true,
                         title: {
                             display: true,
-                            text: 'Valor (R$)'
+                            text: 'Valor (R$)',
+                            color: '#9ca3af'
                         },
                         ticks: {
+                            color: '#9ca3af',
                             callback: function(value) {
                                 return 'R$ ' + value.toLocaleString('pt-BR', {
                                     minimumFractionDigits: 0,
                                     maximumFractionDigits: 0
                                 });
                             }
+                        },
+                        grid: {
+                            color: 'rgba(75, 85, 99, 0.3)'
                         }
                     }
                 },
@@ -359,12 +370,12 @@ class CompoundInterestCalculator {
         
         tableTitle.innerHTML = `<i class="fas fa-table text-purple-500 mr-2"></i>Evolução ${periodLabelPlural}`;
         tableHeader.innerHTML = `
-            <tr class="border-b-2 border-gray-200">
-                <th class="text-left py-2 px-2 font-semibold text-gray-700">${periodLabel}</th>
-                <th class="text-right py-2 px-2 font-semibold text-gray-700">Aporte</th>
-                <th class="text-right py-2 px-2 font-semibold text-gray-700">Saldo Anterior</th>
-                <th class="text-right py-2 px-2 font-semibold text-gray-700">${interestLabel}</th>
-                <th class="text-right py-2 px-2 font-semibold text-gray-700">Saldo Final</th>
+            <tr class="border-b-2 border-gray-700">
+                <th class="text-left py-2 px-2 font-semibold text-gray-300">${periodLabel}</th>
+                <th class="text-right py-2 px-2 font-semibold text-gray-300">Aporte</th>
+                <th class="text-right py-2 px-2 font-semibold text-gray-300">Saldo Anterior</th>
+                <th class="text-right py-2 px-2 font-semibold text-gray-300">${interestLabel}</th>
+                <th class="text-right py-2 px-2 font-semibold text-gray-300">Saldo Final</th>
             </tr>
         `;
         
@@ -423,29 +434,29 @@ class CompoundInterestCalculator {
             
             if (periodType === 'months' && results.length > 12 && index === 12) {
                 return `
-                    <tr class="border-t-2 border-gray-300">
-                        <td class="text-center py-2 px-2 font-semibold">...</td>
-                        <td class="text-center py-2 px-2">...</td>
-                        <td class="text-center py-2 px-2">...</td>
-                        <td class="text-center py-2 px-2">...</td>
-                        <td class="text-center py-2 px-2">...</td>
+                    <tr class="border-t-2 border-gray-600">
+                        <td class="text-center py-2 px-2 font-semibold text-gray-400">...</td>
+                        <td class="text-center py-2 px-2 text-gray-400">...</td>
+                        <td class="text-center py-2 px-2 text-gray-400">...</td>
+                        <td class="text-center py-2 px-2 text-gray-400">...</td>
+                        <td class="text-center py-2 px-2 text-gray-400">...</td>
                     </tr>
-                    <tr class="border-t-2 border-gray-300 bg-blue-50">
+                    <tr class="border-t-2 border-gray-600 bg-gray-700">
                         <td class="text-left py-2 px-2 font-semibold">${periodLabel} ${periodNumber}</td>
                         <td class="text-right py-2 px-2">${this.formatCurrency(contribution)}</td>
                         <td class="text-right py-2 px-2">${this.formatCurrency(previousBalance)}</td>
-                        <td class="text-right py-2 px-2 text-green-600 font-semibold">${this.formatCurrency(periodInterest)}</td>
-                        <td class="text-right py-2 px-2 font-semibold text-blue-600">${this.formatCurrency(result.finalBalance)}</td>
+                        <td class="text-right py-2 px-2 text-green-500 font-semibold">${this.formatCurrency(periodInterest)}</td>
+                        <td class="text-right py-2 px-2 font-semibold text-blue-400">${this.formatCurrency(result.finalBalance)}</td>
                     </tr>
                 `;
             }
 
             return `
-                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                <tr class="border-b border-gray-700 hover:bg-gray-700/50">
                     <td class="text-left py-2 px-2 font-medium">${periodLabel} ${periodNumber}</td>
                     <td class="text-right py-2 px-2">${this.formatCurrency(contribution)}</td>
                     <td class="text-right py-2 px-2">${this.formatCurrency(previousBalance)}</td>
-                    <td class="text-right py-2 px-2 text-green-600">${this.formatCurrency(periodInterest)}</td>
+                    <td class="text-right py-2 px-2 text-green-500">${this.formatCurrency(periodInterest)}</td>
                     <td class="text-right py-2 px-2 font-semibold">${this.formatCurrency(result.finalBalance)}</td>
                 </tr>
             `;

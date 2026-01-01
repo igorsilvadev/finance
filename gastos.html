@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle de Gastos</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         input[type="number"]::-webkit-inner-spin-button,
@@ -116,10 +118,15 @@
             <!-- Resumo -->
             <section class="lg:col-span-2">
                 <div class="bg-gray-800 rounded-2xl shadow-xl p-6">
-                    <h2 class="text-2xl font-semibold mb-6">
-                        <i class="fas fa-clipboard-list text-blue-500 mr-2"></i>
-                        Resumo
-                    </h2>
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-semibold">
+                            <i class="fas fa-clipboard-list text-blue-500 mr-2"></i>
+                            Resumo
+                        </h2>
+                        <button id="exportPdf" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition text-sm">
+                            <i class="fas fa-file-pdf mr-2"></i>Exportar PDF
+                        </button>
+                    </div>
                     
                     <div class="overflow-x-auto">
                         <table class="w-full">

@@ -113,6 +113,11 @@ class ExpenseController {
                 this.clearCurrentPeriodExpenses();
             }
         });
+
+        // Exportar PDF
+        document.getElementById('exportPdf').addEventListener('click', () => {
+            this.exportToPdf();
+        });
     }
 
     initializeCurrencyInputs() {
@@ -375,6 +380,173 @@ class ExpenseController {
         });
         this.saveToStorage();
         this.render();
+    }
+
+    getMonthName(month) {
+        const months = [
+            'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+            'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+        ];
+        return months[month - 1];
+    }
+
+    exportToPdf() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        const currentExpenses = this.getCurrentPeriodExpenses();
+        const monthName = this.getMonthName(this.currentMonth);
+        const title = `Relatório de Gastos - ${monthName}/${this.currentYear}`;
+        
+        // Configurações
+        const pageWidth = doc.internal.pageSize.getWidth();
+        let yPos = 20;
+        
+        // Título
+        doc.setFontSize(18);
+        doc.setFont('helvetica', 'bold');
+        doc.text(title, pageWidth / 2, yPos, { align: 'center' });
+        yPos += 15;
+        
+        // Informações gerais
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Renda Mensal: ${this.formatCurrency(this.monthlyIncome)}`, 14, yPos);
+        yPos += 8;
+        doc.text(`Data de Geração: ${new Date().toLocaleDateString('pt-BR')}`, 14, yPos);
+        yPos += 15;
+        
+        // Tabela de Resumo por Categoria
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Resumo por Categoria', 14, yPos);
+        yPos += 8;
+        
+        const resumoData = this.categories.map(cat => {
+            const devoGastar = (this.monthlyIncome * cat.percentage) / 100;
+            const valorGasto = currentExpenses
+                .filter(exp => exp.categoryId === cat.id)
+                .reduce((sum, exp) => sum + exp.value, 0);
+            const utilizado = devoGastar > 0 ? (valorGasto / devoGastar) * 100 : 0;
+            const restante = devoGastar - valorGasto;
+            
+            return [
+                cat.name,
+                `${cat.percentage}%`,
+                this.formatCurrency(valorGasto),
+                this.formatCurrency(devoGastar),
+                `${utilizado.toFixed(1)}%`,
+                this.formatCurrency(restante)
+            ];
+        });
+        
+        // Calcular totais
+        let totalGasto = 0;
+        let totalDevoGastar = 0;
+        this.categories.forEach(cat => {
+            const devoGastar = (this.monthlyIncome * cat.percentage) / 100;
+            const valorGasto = currentExpenses
+                .filter(exp => exp.categoryId === cat.id)
+                .reduce((sum, exp) => sum + exp.value, 0);
+            totalGasto += valorGasto;
+            totalDevoGastar += devoGastar;
+        });
+        const totalUtilizado = totalDevoGastar > 0 ? (totalGasto / totalDevoGastar) * 100 : 0;
+        const totalRestante = totalDevoGastar - totalGasto;
+        
+        // Adicionar linha de total
+        resumoData.push([
+            'TOTAL',
+            '100%',
+            this.formatCurrency(totalGasto),
+            this.formatCurrency(totalDevoGastar),
+            `${totalUtilizado.toFixed(1)}%`,
+            this.formatCurrency(totalRestante)
+        ]);
+        
+        doc.autoTable({
+            startY: yPos,
+            head: [['Categoria', 'Meta %', 'Gasto', 'Orçamento', 'Utilizado', 'Restante']],
+            body: resumoData,
+            theme: 'striped',
+            headStyles: { fillColor: [59, 130, 246], textColor: 255 },
+            footStyles: { fillColor: [34, 197, 94], textColor: 255, fontStyle: 'bold' },
+            styles: { fontSize: 9, cellPadding: 3 },
+            columnStyles: {
+                0: { cellWidth: 40 },
+                1: { halign: 'center' },
+                2: { halign: 'right' },
+                3: { halign: 'right' },
+                4: { halign: 'center' },
+                5: { halign: 'right' }
+            },
+            didParseCell: function(data) {
+                // Destacar linha de total
+                if (data.row.index === resumoData.length - 1) {
+                    data.cell.styles.fontStyle = 'bold';
+                    data.cell.styles.fillColor = [229, 231, 235];
+                }
+            }
+        });
+        
+        yPos = doc.lastAutoTable.finalY + 15;
+        
+        // Lista de Gastos Detalhados
+        if (currentExpenses.length > 0) {
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Gastos Detalhados', 14, yPos);
+            yPos += 8;
+            
+            const gastosData = currentExpenses
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .map(exp => {
+                    const category = this.categories.find(c => c.id === exp.categoryId);
+                    return [
+                        new Date(exp.date).toLocaleDateString('pt-BR'),
+                        category?.name || 'N/A',
+                        exp.description,
+                        this.formatCurrency(exp.value)
+                    ];
+                });
+            
+            doc.autoTable({
+                startY: yPos,
+                head: [['Data', 'Categoria', 'Descrição', 'Valor']],
+                body: gastosData,
+                theme: 'striped',
+                headStyles: { fillColor: [147, 51, 234], textColor: 255 },
+                styles: { fontSize: 9, cellPadding: 3 },
+                columnStyles: {
+                    0: { cellWidth: 25 },
+                    1: { cellWidth: 35 },
+                    2: { cellWidth: 80 },
+                    3: { halign: 'right', cellWidth: 30 }
+                }
+            });
+        } else {
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'italic');
+            doc.text('Nenhum gasto lançado neste período.', 14, yPos);
+        }
+        
+        // Rodapé
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'normal');
+            doc.text(
+                `Página ${i} de ${pageCount} - Gerado em ${new Date().toLocaleString('pt-BR')}`,
+                pageWidth / 2,
+                doc.internal.pageSize.getHeight() - 10,
+                { align: 'center' }
+            );
+        }
+        
+        // Salvar PDF
+        const fileName = `relatorio-gastos-${monthName.toLowerCase()}-${this.currentYear}.pdf`;
+        doc.save(fileName);
     }
 }
 

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Juros Compostos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Remove spinners dos inputs numéricos */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">
+                <i class="fas fa-chart-line text-blue-600 mr-3"></i>
+                Calculadora de Juros Compostos
+            </h1>
+            <p class="text-gray-600">Calcule o crescimento dos seus investimentos com aportes mensais</p>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Formulário de Entrada -->
+            <section class="lg:col-span-1">
+                <div class="bg-white rounded-2xl shadow-xl p-6">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-6">
+                        <i class="fas fa-calculator text-blue-500 mr-2"></i>
+                        Parâmetros
+                    </h2>
+                    
+                    <form id="calculatorForm" class="space-y-4">
+                        <div>
+                            <label for="initialAmount" class="block text-sm font-medium text-gray-700 mb-1">
+                                Saldo Inicial (R$)
+                            </label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">R$</span>
+                                <input type="text" id="initialAmount" 
+                                    class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent currency-input"
+                                    placeholder="0,00" value="1.000,00">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="interestRate" class="block text-sm font-medium text-gray-700 mb-1">
+                                Taxa de Juros (%)
+                            </label>
+                            <div class="flex gap-2">
+                                <div class="relative flex-1">
+                                    <input type="number" id="interestRate" 
+                                        class="w-full pr-8 pl-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="0.00" step="0.01" min="0" max="100" value="12">
+                                    <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
+                                </div>
+                                <select id="rateType" 
+                                    class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-sm">
+                                    <option value="annual">Anual</option>
+                                    <option value="monthly">Mensal</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="monthlyContribution" class="block text-sm font-medium text-gray-700 mb-1">
+                                Aporte Mensal (R$)
+                            </label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">R$</span>
+                                <input type="text" id="monthlyContribution" 
+                                    class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent currency-input"
+                                    placeholder="0,00" value="500,00">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="period" class="block text-sm font-medium text-gray-700 mb-1">
+                                Período
+                            </label>
+                            <div class="flex gap-2">
+                                <input type="number" id="period" 
+                                    class="flex-1 pl-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    placeholder="12" min="1" max="600" value="12">
+                                <select id="periodType" 
+                                    class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-sm">
+                                    <option value="months">Meses</option>
+                                    <option value="years">Anos</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" 
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 transform hover:scale-105 shadow-lg">
+                            <i class="fas fa-chart-bar mr-2"></i>
+                            Calcular
+                        </button>
+                    </form>
+
+                    <!-- Resultados Resumidos -->
+                    <div id="summaryResults" class="mt-6 p-4 bg-blue-50 rounded-lg hidden">
+                        <h3 class="font-semibold text-gray-800 mb-3">Resumo dos Resultados</h3>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Total Investido:</span>
+                                <span id="totalInvested" class="font-semibold text-gray-800">R$ 0,00</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Total em Juros:</span>
+                                <span id="totalInterest" class="font-semibold text-green-600">R$ 0,00</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Valor Final:</span>
+                                <span id="finalValue" class="font-semibold text-blue-600 text-lg">R$ 0,00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Gráfico e Tabela -->
+            <section class="lg:col-span-2 space-y-8">
+                <!-- Gráfico -->
+                <div class="bg-white rounded-2xl shadow-xl p-6">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-6">
+                        <i class="fas fa-chart-area text-green-500 mr-2"></i>
+                        Projeção de Crescimento
+                    </h2>
+                    <div class="relative" style="height: 400px;">
+                        <canvas id="growthChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Tabela Detalhada -->
+                <div class="bg-white rounded-2xl shadow-xl p-6">
+                    <h2 id="tableTitle" class="text-2xl font-semibold text-gray-800 mb-6">
+                        <i class="fas fa-table text-purple-500 mr-2"></i>
+                        Evolução Mensal
+                    </h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead id="tableHeader">
+                                <tr class="border-b-2 border-gray-200">
+                                    <th class="text-left py-2 px-2 font-semibold text-gray-700">Mês</th>
+                                    <th class="text-right py-2 px-2 font-semibold text-gray-700">Aporte</th>
+                                    <th class="text-right py-2 px-2 font-semibold text-gray-700">Saldo Anterior</th>
+                                    <th class="text-right py-2 px-2 font-semibold text-gray-700">Juros do Mês</th>
+                                    <th class="text-right py-2 px-2 font-semibold text-gray-700">Saldo Final</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultsTable">
+                                <tr>
+                                    <td colspan="5" class="text-center py-8 text-gray-500">
+                                        Preencha os parâmetros e clique em "Calcular" para ver os resultados
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="text-center mt-12 text-gray-600 text-sm">
+            <p>Calculadora de Juros Compostos • Desenvolvida com <i class="fas fa-heart text-red-500"></i> para seus investimentos</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

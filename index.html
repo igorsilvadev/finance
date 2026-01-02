@@ -3,9 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Juros Compostos</title>
+    <title>Calculadora de Juros Compostos Online Grátis | Simulação de Investimentos</title>
+    <meta name="description" content="Calculadora de juros compostos online e grátis. Simule seus investimentos com aportes mensais, taxa de juros anual ou mensal e visualize gráficos de projeção. Calcule o rendimento da poupança, CDB, Tesouro Direto e outros investimentos.">
+    <meta name="keywords" content="calculadora juros compostos, simulação investimentos, calcular rendimento, juros sobre juros, investimento mensal, aporte mensal, taxa de juros, rentabilidade, poupança, CDB, Tesouro Direto, renda fixa, calculadora financeira">
+    <meta name="author" content="Calculadora Financeira">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#111827">
+    <meta property="og:title" content="Calculadora de Juros Compostos Online Grátis">
+    <meta property="og:description" content="Simule seus investimentos com juros compostos. Calcule rendimentos com aportes mensais e visualize gráficos de projeção.">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:url" content="https://igorsilvadev.com/finance/">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Calculadora de Juros Compostos Online">
+    <meta name="twitter:description" content="Simule investimentos com juros compostos, aportes mensais e visualize gráficos de projeção.">
+    <link rel="canonical" href="https://igorsilvadev.com/finance/">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%233b82f6'/%3E%3Cpath d='M25 70 L40 30 L55 55 L70 25 L85 50' stroke='white' stroke-width='8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='85' cy='50' r='6' fill='%2322c55e'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         /* Remove spinners dos inputs numéricos */
@@ -47,7 +65,7 @@
                 <p class="text-gray-400">Calcule o crescimento dos seus investimentos com aportes mensais</p>
             </div>
             <nav>
-                <a href="gastos.html" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition shadow-lg">
+                <a href="./gastos.html" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition shadow-lg">
                     <i class="fas fa-wallet mr-2"></i>Controle de Gastos
                 </a>
             </nav>
@@ -193,11 +211,33 @@
             </section>
         </main>
 
+        <article class="mt-16 bg-gray-800/30 rounded-2xl p-8 border border-gray-700">
+            <h2 class="text-2xl font-bold text-gray-200 mb-4">
+                <i class="fas fa-info-circle text-blue-500 mr-2"></i>
+                O que são Juros Compostos?
+            </h2>
+            <div class="text-gray-400 space-y-4 text-sm leading-relaxed">
+                <p>
+                    <strong class="text-gray-300">Juros compostos</strong> são conhecidos como "juros sobre juros" e representam uma das formas mais poderosas de fazer seu dinheiro crescer ao longo do tempo. Diferente dos <strong class="text-gray-300">juros simples</strong>, onde os rendimentos são calculados apenas sobre o valor inicial, nos juros compostos os rendimentos de cada período são somados ao capital, gerando novos rendimentos.
+                </p>
+                <p>
+                    Nossa <strong class="text-gray-300">calculadora de juros compostos online</strong> permite simular diversos tipos de <strong class="text-gray-300">investimentos</strong> como <strong class="text-gray-300">poupança</strong>, <strong class="text-gray-300">CDB</strong>, <strong class="text-gray-300">Tesouro Direto</strong>, <strong class="text-gray-300">fundos de investimento</strong> e outras aplicações de <strong class="text-gray-300">renda fixa</strong>. Você pode inserir o <strong class="text-gray-300">valor inicial</strong>, a <strong class="text-gray-300">taxa de juros</strong> (anual ou mensal), o <strong class="text-gray-300">aporte mensal</strong> e o <strong class="text-gray-300">período</strong> desejado.
+                </p>
+                <p>
+                    A ferramenta gera automaticamente um <strong class="text-gray-300">gráfico de projeção</strong> mostrando a evolução do seu patrimônio, diferenciando o <strong class="text-gray-300">total investido</strong> dos <strong class="text-gray-300">juros acumulados</strong>. Isso ajuda a visualizar o poder dos juros compostos no longo prazo e a importância de começar a investir o quanto antes.
+                </p>
+                <p>
+                    <strong class="text-gray-300">Como usar a calculadora:</strong> Insira o saldo inicial (quanto você tem para investir hoje), defina a taxa de juros esperada (ex: 12% ao ano para renda fixa), adicione o valor do aporte mensal que pretende fazer regularmente, escolha o período em meses ou anos e clique em calcular para ver sua projeção financeira.
+                </p>
+            </div>
+        </article>
+
         <footer class="text-center mt-12 text-gray-500 text-sm">
             <p>Calculadora de Juros Compostos • Desenvolvida com <i class="fas fa-heart text-red-500"></i> para seus investimentos</p>
+            <p class="mt-2">Simulação de investimentos | Juros sobre juros | Rendimento de poupança e CDB</p>
         </footer>
     </div>
 
-    <script src="script.js"></script>
+    <script defer src="script.js"></script>
 </body>
 </html>

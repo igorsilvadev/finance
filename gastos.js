@@ -14,6 +14,9 @@ class ExpenseController {
         this.currentMonth = new Date().getMonth() + 1;
         this.currentYear = new Date().getFullYear();
         
+        this.pdfLibsLoaded = false;
+        this.isExportingPdf = false;
+        
         this.initializeYearSelect();
         this.loadFromStorage();
         this.initializeEventListeners();
@@ -118,6 +121,43 @@ class ExpenseController {
         document.getElementById('exportPdf').addEventListener('click', () => {
             this.exportToPdf();
         });
+    }
+
+    async loadPdfLibraries() {
+        if (this.pdfLibsLoaded) return;
+
+        if (window.jspdf?.jsPDF && typeof window.jspdf?.jsPDF === 'function' && typeof window.jspdf?.jsPDF?.API?.autoTable === 'function') {
+            this.pdfLibsLoaded = true;
+            return;
+        }
+
+        const loadScript = (src) => {
+            return new Promise((resolve, reject) => {
+                const existing = document.querySelector(`script[src="${src}"]`);
+                if (existing) {
+                    existing.addEventListener('load', () => resolve());
+                    existing.addEventListener('error', () => reject(new Error(`Falha ao carregar ${src}`)));
+                    return;
+                }
+
+                const script = document.createElement('script');
+                script.src = src;
+                script.async = true;
+                script.onload = () => resolve();
+                script.onerror = () => reject(new Error(`Falha ao carregar ${src}`));
+                document.head.appendChild(script);
+            });
+        };
+
+        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js');
+
+        // Confirma que a API ficou disponível
+        if (!window.jspdf?.jsPDF) {
+            throw new Error('jsPDF não foi carregado corretamente.');
+        }
+
+        this.pdfLibsLoaded = true;
     }
 
     initializeCurrencyInputs() {
@@ -382,6 +422,50 @@ class ExpenseController {
         this.render();
     }
 
+    async loadPdfLibraries() {
+        if (this.pdfLibsLoaded) return;
+
+        // Se já estiverem disponíveis (por algum motivo), só marca como carregado.
+        if (window.jspdf?.jsPDF && typeof window.jspdf.jsPDF === 'function' && typeof window.jspdf?.jsPDF?.API?.autoTable === 'function') {
+            this.pdfLibsLoaded = true;
+            return;
+        }
+
+        const loadScript = (src) => {
+            return new Promise((resolve, reject) => {
+                const existing = document.querySelector(`script[src="${src}"]`);
+                if (existing) {
+                    if (existing.dataset.loaded === 'true') {
+                        resolve();
+                        return;
+                    }
+                    existing.addEventListener('load', () => resolve());
+                    existing.addEventListener('error', () => reject(new Error(`Falha ao carregar ${src}`)));
+                    return;
+                }
+
+                const script = document.createElement('script');
+                script.src = src;
+                script.async = true;
+                script.onload = () => {
+                    script.dataset.loaded = 'true';
+                    resolve();
+                };
+                script.onerror = () => reject(new Error(`Falha ao carregar ${src}`));
+                document.head.appendChild(script);
+            });
+        };
+
+        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js');
+
+        if (!window.jspdf?.jsPDF) {
+            throw new Error('jsPDF não foi carregado corretamente.');
+        }
+
+        this.pdfLibsLoaded = true;
+    }
+
     getMonthName(month) {
         const months = [
             'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -390,9 +474,23 @@ class ExpenseController {
         return months[month - 1];
     }
 
-    exportToPdf() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
+    async exportToPdf() {
+        if (this.isExportingPdf) return;
+        this.isExportingPdf = true;
+
+        const exportButton = document.getElementById('exportPdf');
+        const originalButtonHtml = exportButton?.innerHTML;
+        if (exportButton) {
+            exportButton.disabled = true;
+            exportButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Gerando...';
+            exportButton.classList.add('opacity-75', 'cursor-not-allowed');
+        }
+
+        try {
+            await this.loadPdfLibraries();
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
         
         const currentExpenses = this.getCurrentPeriodExpenses();
         const monthName = this.getMonthName(this.currentMonth);
@@ -530,23 +628,52 @@ class ExpenseController {
             doc.text('Nenhum gasto lançado neste período.', 14, yPos);
         }
         
-        // Rodapé
+        // Rodapé com link do site
         const pageCount = doc.internal.getNumberOfPages();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        
         for (let i = 1; i <= pageCount; i++) {
             doc.setPage(i);
-            doc.setFontSize(8);
+            
+            // Linha separadora
+            doc.setDrawColor(200, 200, 200);
+            doc.line(14, pageHeight - 20, pageWidth - 14, pageHeight - 20);
+            
+            // Link do site
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(59, 130, 246);
+            doc.textWithLink('igorsilvadev.com/finance', 14, pageHeight - 14, { url: 'https://igorsilvadev.com/finance/' });
+            
+            // Informações de página
             doc.setFont('helvetica', 'normal');
+            doc.setTextColor(128, 128, 128);
+            doc.setFontSize(8);
             doc.text(
                 `Página ${i} de ${pageCount} - Gerado em ${new Date().toLocaleString('pt-BR')}`,
-                pageWidth / 2,
-                doc.internal.pageSize.getHeight() - 10,
-                { align: 'center' }
+                pageWidth - 14,
+                pageHeight - 14,
+                { align: 'right' }
             );
         }
+        
+        // Resetar cor do texto
+        doc.setTextColor(0, 0, 0);
         
         // Salvar PDF
         const fileName = `relatorio-gastos-${monthName.toLowerCase()}-${this.currentYear}.pdf`;
         doc.save(fileName);
+        } catch (err) {
+            console.error(err);
+            alert('Não foi possível gerar o PDF. Verifique sua conexão e tente novamente.');
+        } finally {
+            this.isExportingPdf = false;
+            if (exportButton) {
+                exportButton.disabled = false;
+                exportButton.innerHTML = originalButtonHtml;
+                exportButton.classList.remove('opacity-75', 'cursor-not-allowed');
+            }
+        }
     }
 }
 
